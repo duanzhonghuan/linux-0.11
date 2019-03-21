@@ -9,60 +9,119 @@ _syscall1(int, sem_wait, sem_t*, sem)
 _syscall1(int, sem_post, sem_t*, sem) 
 _syscall1(int, sem_unlink, const char*, name) 
 
-sem_t *sem = 0;
 #define BUFF_LEN (10)
+#define MAX_SIZE (500)
 struct	buff
 {
-	int value[BUFF_LEN];
 	int write_index;
 	int read_index;
 } buffer;
 
+sem_t *sem_empty = NULL;
+sem_t *sem_full = NULL;
+sem_t *sem_mutex = NULL;
+FILE *fl = NULL;
+
+
+void write_buff(FILE *fl, int data, int pos)
+{
+	fseek(fl, szieof(int) * pos, SEEK_SET);
+	fwrite(&data, sizeof(int), 1, fl);
+	fflush(fl);
+}
+
+void read_buff(FILE *fl, int *data, int pos)
+{
+	fseek(fl, szieof(int) * pos, SEEK_SET);
+	fread(data, sizeof(int), 1, fl);
+}
+
 void producer()
 {
 	int i = 0;
-	for (i = 0; 1 <= 500; i++)
+	for (i = 0; 1 <= MAX_SIZE; i++)
 	{
-		// TODO:add sem_wait
-		sem_wait(sem);
-		buffer.value[buffer.write_index++] = i;
+		sem_wait(sem_empty);  // 10 choose 1
+		sem_wait(sem_mutex);  // 5(1 producee and 4 consumers) choose 1
+		
+		write_buff(fl, i, buffer.write_index);
+		buffer.write_index = (buffer.write_index + 1) % BUFF_LEN;
+
+		sem_post(sem_mutex);
+		sem_post(sem_full);
 	}
 }
 
 void consumer1()
 {
-	// TODO:add sem_wait
-	int tmp = buffer.value[buffer.read_index];
-	buffer.read_index--;
-	// TODO:unlock
-	printf("%d:  %d\n", getpid(), tmp);
+	int data;
+	for (;;)
+	{
+		sem_wait(sem_full);
+		sem_wait(sem_mutex);
+
+		read_buff(fl, &data, buffer.read_index);
+		buffer.read_index = (buffer.read_index + 1) % BUFF_LEN;
+		printf("%d:  %d\n", getpid(), data);
+		fflush(stdout);
+
+		sem_post(sem_mutex);
+		sem_post(sem_empty);
+	}
 }
 
 void consumer2()
 {
-	// TODO:add sem_wait
-	int tmp = buffer.value[buffer.read_index];
-	buffer.read_index--;
-	// TODO:unlock
-	printf("%d:  %d\n", getpid(), tmp);
+	int data;
+	for (;;)
+	{
+		sem_wait(sem_full);
+		sem_wait(sem_mutex);
+
+		read_buff(fl, &data, buffer.read_index);
+		buffer.read_index = (buffer.read_index + 1) % BUFF_LEN;
+		printf("%d:  %d\n", getpid(), data);
+		fflush(stdout);
+
+		sem_post(sem_mutex);
+		sem_post(sem_empty);
+	}
 }
 
 void consumer3()
 {
-	// TODO:add sem_wait
-	int tmp = buffer.value[buffer.read_index];
-	buffer.read_index--;
-	// TODO:unlock
-	printf("%d:  %d\n", getpid(), tmp);
+	int data;
+	for (;;)
+	{
+		sem_wait(sem_full);
+		sem_wait(sem_mutex);
+
+		read_buff(fl, &data, buffer.read_index);
+		buffer.read_index = (buffer.read_index + 1) % BUFF_LEN;
+		printf("%d:  %d\n", getpid(), data);
+		fflush(stdout);
+
+		sem_post(sem_mutex);
+		sem_post(sem_empty);
+	}
 }
 
 void consumer4()
 {
-	// TODO:add sem_wait
-	int tmp = buffer.value[buffer.read_index];
-	buffer.read_index--;
-	// TODO:unlock
-	printf("%d:  %d\n", getpid(), tmp);
+	int data;
+	for (;;)
+	{
+		sem_wait(sem_full);
+		sem_wait(sem_mutex);
+
+		read_buff(fl, &data, buffer.read_index);
+		buffer.read_index = (buffer.read_index + 1) % BUFF_LEN;
+		printf("%d:  %d\n", getpid(), data);
+		fflush(stdout);
+
+		sem_post(sem_mutex);
+		sem_post(sem_empty);
+	}
 }
 
 int main(int argc, char **argv)
@@ -73,10 +132,17 @@ int main(int argc, char **argv)
 	pid_t consumer3Id = -1; 
 	pid_t consumer4Id = -1; 
 
-	char *sem_name = "sem of add";
-	int sem_value = 10;
-	sem = sem_open(sem_name, sem_value);
-	
+	sem_empty = (sem_t *)sem_open("EMPTY", BUFF_LEN);
+	sem_full  = (sem_t *)sem_open("FULL", 0);
+	sem_mutex = (sem_t *)sem_open("MUTEX", 1);
+
+	fl = fopen("/var/buff.txt", "wb+");
+	if (fl == NULL)
+	{
+		printf("can not open buff by wb+ \n");
+		return 0;
+	}
+
 	if ((producerId = fork()) == 0)
 	{
 		producer();
@@ -97,12 +163,17 @@ int main(int argc, char **argv)
 	{
 		consumer4();
 	}
+	wait(NULL);
+	sem_unlink("EMPTY");
+	sem_unlink("FULL");
+	sem_unlink("MUTEX");
+	
 	printf("producerId = %d\n", producerId);
 	printf("consumer1Id = %d\n", consumer1Id);
 	printf("consumer2Id = %d\n", consumer2Id);
 	printf("consumer3Id = %d\n", consumer3Id);
 	printf("consumer4Id = %d\n", consumer4Id);
-	wait(0);
+	fflush(stdout);
 	return 0;
 }
 

@@ -71,7 +71,7 @@ extern int sys_ssetmask();
 extern int sys_setreuid();
 extern int sys_setregid();
 
-extern sem_t *sys_sem_open();
+extern int sys_sem_open();
 extern int sys_sem_wait();
 extern int sys_sem_post();
 extern int sys_sem_unlink();
@@ -88,4 +88,4 @@ sys_getgid, sys_signal, sys_geteuid, sys_getegid, sys_acct, sys_phys,
 sys_lock, sys_ioctl, sys_fcntl, sys_mpx, sys_setpgid, sys_ulimit,
 sys_uname, sys_umask, sys_chroot, sys_ustat, sys_dup2, sys_getppid,
 sys_getpgrp, sys_setsid, sys_sigaction, sys_sgetmask, sys_ssetmask,
-sys_setreuid,sys_setregid, sys_sem_open, sys_sem_wait, sys_sem_post, sys_sem_unlink };
+sys_setreuid,sys_setregid, sys_sem_open, sys_sem_wait, sys_sem_post , sys_sem_unlink };

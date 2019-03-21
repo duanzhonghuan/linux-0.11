@@ -20,23 +20,26 @@ struct sem_list_info {
 	int index;
 };
 
-struct sem_list_info sem_info = {0};
+struct sem_list_info sem_info = {0, 0};
 
 static int find_sem(const char *name)
 {
 	int i = 0;
 	for (i = 0; i < MAX_SEM_NUM; i++)
 	{
+		if (!sem_info.sem_list[i])
+		{
+			continue;
+		}
 		if (0 == strcmp(sem_info.sem_list[i]->name, name))
 		{
 			return i;
 		}
-		i++;
 	}
 	return -1;
 }
 
-sem_t *sys_sem_open(const char *name, unsigned int value)
+int sys_sem_open(const char *name, unsigned int value)
 {
 	sem_t *sem = 0;
 	int i = 0;
@@ -86,15 +89,8 @@ int sys_sem_post(sem_t *sem)
 {
 	int i = 0;
 	cli();
-	if (sem->value + 1 <= sem->max_value)
-	{
-		sem->value++;
-		wake_up(*(sem->b_wait);
-	}
-	else
-	{
-		i = -1;
-	}
+	sem->value++;
+	wake_up(*(sem->b_wait);
 	sti();
 	return i;
 }
@@ -107,10 +103,6 @@ int sys_sem_unlink(const char *name)
 	if (index >= 0)
 	{
 		free(sem_info.sem_list[index]);
-	}
-	else
-	{
-		i = -1;
 	}
 	sti();
 	return i;
