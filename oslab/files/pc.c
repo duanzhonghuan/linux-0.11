@@ -15,6 +15,7 @@ struct	buff
 {
 	int write_index;
 	int read_index;
+	int read_count;
 } buffer;
 
 sem_t *sem_empty = NULL;
@@ -64,6 +65,13 @@ void consumer1()
 		buffer.read_index = (buffer.read_index + 1) % BUFF_LEN;
 		printf("%d:  %d\n", getpid(), data);
 		fflush(stdout);
+		
+		// exit it when read all data from the file
+		buffer.read_count++;
+		if (buffer.read_count >= MAX_SIZE)
+		{
+			break;
+		}
 
 		sem_post(sem_mutex);
 		sem_post(sem_empty);
@@ -83,6 +91,13 @@ void consumer2()
 		printf("%d:  %d\n", getpid(), data);
 		fflush(stdout);
 
+		// exit it when read all data from the file
+		buffer.read_count++;
+		if (buffer.read_count >= MAX_SIZE)
+		{
+			break;
+		}
+
 		sem_post(sem_mutex);
 		sem_post(sem_empty);
 	}
@@ -101,6 +116,13 @@ void consumer3()
 		printf("%d:  %d\n", getpid(), data);
 		fflush(stdout);
 
+		// exit it when read all data from the file
+		buffer.read_count++;
+		if (buffer.read_count >= MAX_SIZE)
+		{
+			break;
+		}
+
 		sem_post(sem_mutex);
 		sem_post(sem_empty);
 	}
@@ -118,6 +140,13 @@ void consumer4()
 		buffer.read_index = (buffer.read_index + 1) % BUFF_LEN;
 		printf("%d:  %d\n", getpid(), data);
 		fflush(stdout);
+
+		// exit it when read all data from the file
+		buffer.read_count++;
+		if (buffer.read_count >= MAX_SIZE)
+		{
+			break;
+		}
 
 		sem_post(sem_mutex);
 		sem_post(sem_empty);
