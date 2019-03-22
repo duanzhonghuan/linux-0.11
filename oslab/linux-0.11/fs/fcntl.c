@@ -29,7 +29,7 @@ static int dupfd(unsigned int fd, unsigned int arg)
 	if (arg >= NR_OPEN)
 		return -EMFILE;
 	current->close_on_exec &= ~(1<<arg);
-	(current->filp[arg] = current->filp[fd])->f_count++;
+	(current->filp[arg] = current->filp[fd])->f_count++;  // the important code of copying file to a new fd
 	return arg;
 }
 
