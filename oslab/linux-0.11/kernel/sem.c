@@ -6,7 +6,7 @@
 #define MAX_NAME_LEN  (32)
 #define MAX_SEM_NUM  (64)
 
-struct sem_t {
+struct sem_s {
 	char  name[MAX_NAME_LEN];
 	int max_value;
 	int value;
@@ -14,13 +14,14 @@ struct sem_t {
 	int enable;
 	int lock;
 };
+typedef struct sem_s sem_t;
 
 struct sem_list_info {
-	struct sem_t *sem_list[MAX_SEM_NUM];
+    sem_t *sem_list[MAX_SEM_NUM];
 	int index;
 };
 
-struct sem_list_info sem_info = {0, 0};
+struct sem_list_info sem_info = {0};
 
 static int find_sem(const char *name)
 {
@@ -51,10 +52,10 @@ int sys_sem_open(const char *name, unsigned int value)
 		{
 			if (!sem_info.sem_list[i])
 			{
-				sem_info.sem_list[i] = malloc(sizeof(struct sem_t)); 
-				sem_info.sem_list[i].max_value = value;
-				sem_info.sem_list[i].value = value;
-				sem_info.sem_list[i].enable = 1;
+				sem_info.sem_list[i] = malloc(sizeof(sem_t)); 
+				sem_info.sem_list[i]->max_value = value;
+				sem_info.sem_list[i]->value = value;
+				sem_info.sem_list[i]->enable = 1;
 				sem = sem_info.sem_list[i];
 				break;
 			}
@@ -62,7 +63,7 @@ int sys_sem_open(const char *name, unsigned int value)
 	}
 	else
 	{
-		sem_info.sem_list[index].enable = 1;
+		sem_info.sem_list[index]->enable = 1;
 		sem = sem_info.sem_list[index];
 	}
 	sti();
@@ -73,9 +74,9 @@ int sys_sem_wait(sem_t *sem)
 {
 	int i = 0;
 	cli();
-	if (--sem->value < 0) // if the value is less than 0, save the info and enter the schedule
+	if (--sem->value < 0)  // if the value is less than 0, save the info and enter the schedule
 	{
-		sleep_on(*(sem->b_wait);
+		sleep_on(&(sem->b_wait));
 	}
 	else
 	{
@@ -90,7 +91,7 @@ int sys_sem_post(sem_t *sem)
 	int i = 0;
 	cli();
 	sem->value++;
-	wake_up(*(sem->b_wait);
+	wake_up(&(sem->b_wait));
 	sti();
 	return i;
 }
