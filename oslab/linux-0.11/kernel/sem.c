@@ -12,7 +12,6 @@ struct sem_s {
 	int value;
 	struct task_struct	*b_wait;
 	int enable;
-	int lock;
 };
 typedef struct sem_s sem_t;
 
@@ -72,15 +71,12 @@ int sys_sem_open(const char *name, unsigned int value)
 
 int sys_sem_wait(sem_t *sem)
 {
+	if (!sem || !sem->enable) {return -1;}
 	int i = 0;
 	cli();
 	if (--sem->value < 0)  // if the value is less than 0, save the info and enter the schedule
 	{
 		sleep_on(&(sem->b_wait));
-	}
-	else
-	{
-		i = -1;
 	}
 	sti();
 	return i;
@@ -88,6 +84,7 @@ int sys_sem_wait(sem_t *sem)
 
 int sys_sem_post(sem_t *sem)
 {
+	if (!sem || !sem->enable) {return -1;}
 	int i = 0;
 	cli();
 	sem->value++;
