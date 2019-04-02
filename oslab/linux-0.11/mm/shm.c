@@ -16,51 +16,49 @@
  * =====================================================================================
  */
 
-#include <linux/kernel.h>
 #include <linux/mm.h>
-#include <sched.h>
+#include <linux/sched.h>
 #include <errno.h>
 
-typedef int key_t;
-int shmid = -1;
-unsigned long share_physical_address = 0;
+#define COUNT (10)
+#define SIZE_MAX  (4096)
+unsigned long share_physical_address[COUNT] = {0};
 
 /* create or open a page of the share memroy */
-int shmget(key_t key, size_t size, int shmflg)
+int sys_shmget(int key, size_t size, int shmflg)
 {
 	// forbid it that more than 4K size
-	if (key <= 0 || size > 0x1000)
+	if (key < 0 || key >= COUNT || size > SIZE_MAX)
 	{
 		errno = EINVAL; 
 		return -1;
 	}
-	if (-1 == shmid)
+
+	// allocate a page of the free page from the physical memroy
+	if (0 != share_physical_address[key])
 	{
-		share_physical_address = get_free_page();
-		if (0 == share_physical_address)
+		share_physical_address[key] = get_free_page();
+		if (0 == share_physical_address[key])
 		{
 			errno = EINVAL; 
 			return -1;
 		}
-		shmid = 1;
 	}
-	return shmid;
-}
-
-/* get logic or virtual address from the physical address */
-static void *get_logic_address(unsigned long physical_address)
-{
-
+	return share_physical_address[key];
 }
 
 /* get logic address of the memory address */
-void *shmat(int shmid, const void *shmaddr, int shmflg)
+void *sys_shmat(int shmid, const void *shmaddr, int shmflg)
 {
 	if (shmid == -1)
 	{
 		errno = EINVAL;
 		return (void*)0;
 	}
-	return get_logic_address(share_physical_address);
+	
+	// establish a mapping between the physical page and the current virtual breakpoint 
+	put_page(shmid, (current->start_code + current->brk));
+
+	return (void*)(current->brk);
 }
 
