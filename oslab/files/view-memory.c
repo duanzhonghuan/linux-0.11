@@ -17,10 +17,10 @@
  */
 #include <stdio.h>
 
+int i = 0x12345678;
 int main(void)
 {
-	unsigned int i = 0x12345678;
-	printf("The logic or virtual address of i is 0x%x\n, i");
-	while(1);
+	printf("The logic or virtual address of i is 0x%08x\n, &i");
+	while(i);
 	return 0;
 }
