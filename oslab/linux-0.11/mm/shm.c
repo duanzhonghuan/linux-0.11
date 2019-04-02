@@ -48,17 +48,19 @@ int sys_shmget(int key, size_t size, int shmflg)
 }
 
 /* get logic address of the memory address */
-void *sys_shmat(int shmid, const void *shmaddr, int shmflg)
+int sys_shmat(int shmid, const void *shmaddr, int shmflg)
 {
+	unsigned long data_base = 0; 
+	unsigned long data_limit = 0; 
 	if (shmid == -1)
 	{
 		errno = EINVAL;
-		return (void*)0;
+		return 0;
 	}
 	
 	// establish a mapping between the physical page and the current virtual breakpoint 
 	put_page(shmid, (current->start_code + current->brk));
 
-	return (void*)(current->brk);
+	return current->brk;
 }
 
