@@ -94,7 +94,7 @@ char *buff = 0;
 int main(int argc, char **argv)
 {
 #define BUFF_LEN (10)
-#define MAX_SIZE (500)
+#define MAX_SIZE (255)
 
 	int shmid = 0;
 	int share_memory_address = 0;
@@ -105,6 +105,7 @@ int main(int argc, char **argv)
 	int index = 0;
 	int count = 0;
 	FILE *result = NULL;
+	int *end_flag = 0;
 
 	result = fopen("/var/result.txt", "wb+");
 	if (result == NULL)
@@ -128,6 +129,8 @@ int main(int argc, char **argv)
 	}
 
 	buff = (char*)share_memory_address;
+
+	end_flag = (char*)(share_memory_address + 12);
 	
 	sem_empty = (sem_t *)sem_open("EMPTY", BUFF_LEN);
 	sem_full  = (sem_t *)sem_open("FULL", 0);
@@ -137,7 +140,7 @@ int main(int argc, char **argv)
 		sem_wait(sem_full);
 		sem_wait(sem_mutex);
 
-		fprintf(result, "pid1:%d:  read data = %d, read index = %d\n", getpid(), buff[index], index);
+		fprintf(result, "pid:%d:  read data = %d, read index = %d\n", getpid(), buff[index], index);
 		fflush(result);
 		
 		index = (index + 1) % BUFF_LEN;
@@ -145,6 +148,8 @@ int main(int argc, char **argv)
 		count++;
 		if (count >= MAX_SIZE)
 		{
+			*end_flag = 123;
+			printf("consumer:end_flag = %d\n", *(char*)(share_memory_address + 12));
 			break;
 		}
 
@@ -152,11 +157,7 @@ int main(int argc, char **argv)
 		sem_post(sem_empty);
 	}
 
-	sem_unlink("EMPTY");
-	sem_unlink("FULL");
-	sem_unlink("MUTEX");
-	fclose(result);
-	
+	printf("consumer end\n");
 	return 0;
 }
 

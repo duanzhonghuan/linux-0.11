@@ -35,7 +35,7 @@ int sys_shmget(int key, size_t size, int shmflg)
 	}
 
 	// allocate a page of the free page from the physical memroy
-	if (0 != share_physical_address[key])
+	if (0 == share_physical_address[key])
 	{
 		share_physical_address[key] = get_free_page();
 		if (0 == share_physical_address[key])
@@ -44,6 +44,7 @@ int sys_shmget(int key, size_t size, int shmflg)
 			return -1;
 		}
 	}
+	printk("sys_shmget: address = %d\n", share_physical_address[key]);
 	return share_physical_address[key];
 }
 
@@ -60,6 +61,8 @@ int sys_shmat(int shmid, const void *shmaddr, int shmflg)
 	
 	// establish a mapping between the physical page and the current virtual breakpoint 
 	put_page(shmid, (current->start_code + current->brk));
+	
+	printk("sys_shmat: current->brk = %d\n", current->brk);
 
 	return current->brk;
 }

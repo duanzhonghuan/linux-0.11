@@ -95,7 +95,7 @@ int *value_index = 0;
 int main(int argc, char **argv)
 {
 #define BUFF_LEN (10)
-#define MAX_SIZE (500)
+#define MAX_SIZE (255)
 
 	int shmid = 0;
 	int share_memory_address = 0;
@@ -104,6 +104,7 @@ int main(int argc, char **argv)
 	sem_t *sem_mutex = NULL;
 	int i = 0;
 	FILE *result = NULL;
+	char *end_flag = 0;
 
 	result = fopen("/var/result.txt", "wb+");
 	if (result == NULL)
@@ -128,6 +129,7 @@ int main(int argc, char **argv)
 
 	buff = (char*)share_memory_address;
 	
+	end_flag = (char*)(share_memory_address + 12);
 	value_index = (int*)(share_memory_address + 16);
 
 
@@ -140,19 +142,21 @@ int main(int argc, char **argv)
 		sem_wait(sem_mutex); 
 		
 		buff[*value_index] = i;
-		fprintf(result, "write: %d\n", i);
+		fprintf(result, "write: %d, write_index:%d\n", buff[*value_index], *value_index);
 		fflush(result);
 		*value_index = (*value_index + 1) % BUFF_LEN;
 
 		sem_post(sem_mutex);
 		sem_post(sem_full);
 	}
-
+	
 	sem_unlink("EMPTY");
 	sem_unlink("FULL");
 	sem_unlink("MUTEX");
 	fclose(result);
 	
+	printf("producer end\n");
+	fflush(stdout);
 	return 0;
 }
 

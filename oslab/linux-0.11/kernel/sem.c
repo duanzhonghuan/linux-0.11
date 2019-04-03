@@ -1,7 +1,9 @@
 #include <linux/sched.h>
 #include <linux/kernel.h>
 #include <asm/system.h>
+#include <asm/segment.h>
 #include <string.h>
+#include <stdarg.h>
 
 #define MAX_NAME_LEN  (32)
 #define MAX_SEM_NUM  (64)
@@ -15,6 +17,7 @@ struct sem_s {
 };
 typedef struct sem_s sem_t;
 
+
 struct sem_list_info {
     sem_t *sem_list[MAX_SEM_NUM];
 	int index;
@@ -22,28 +25,49 @@ struct sem_list_info {
 
 struct sem_list_info sem_info = {0};
 
-static int find_sem(const char *name)
+static void get_fs_buff(const char *name, char*buff, int size)
+{
+	int i;
+	memset(buff, 0, size);
+	for (i = 0; i < size; i++)
+	{
+		buff[i] = get_fs_byte(name++);
+		if (buff[i] == '\0')
+		{
+			break;
+		}
+	}
+}
+
+static int find_sem(const char *name, char *buf)
 {
 	int i = 0;
+	get_fs_buff(name, buf, 1024);
 	for (i = 0; i < MAX_SEM_NUM; i++)
 	{
 		if (!sem_info.sem_list[i])
 		{
 			continue;
 		}
-		if (0 == strcmp(sem_info.sem_list[i]->name, name))
+		printk("find_sem: sem_info.sem_list[i]->name = %s\n", sem_info.sem_list[i]->name);
+		if (0 == strcmp(sem_info.sem_list[i]->name, buf))
 		{
+			printk("find_sem: buf = %s\n", buf);
 			return i;
 		}
 	}
 	return -1;
 }
 
+
+
 int sys_sem_open(const char *name, unsigned int value)
 {
 	sem_t *sem = 0;
 	int i = 0;
-	int index = find_sem(name);
+	char buf[1024] = {0};
+	int index = find_sem(name, buf);
+	printk("sys_sem_open: %s\n", buf);
 	cli();
 	if (-1 == index)  // new sem, need create it
 	{
@@ -55,7 +79,9 @@ int sys_sem_open(const char *name, unsigned int value)
 				sem_info.sem_list[i]->max_value = value;
 				sem_info.sem_list[i]->value = value;
 				sem_info.sem_list[i]->enable = 1;
+				strcpy(sem_info.sem_list[i]->name, buf);
 				sem = sem_info.sem_list[i];
+				index = i;
 				break;
 			}
 		}
@@ -66,6 +92,7 @@ int sys_sem_open(const char *name, unsigned int value)
 		sem = sem_info.sem_list[index];
 	}
 	sti();
+	printk("sys_sem_open: %s, index = %d\n", sem_info.sem_list[i]->name, index);
 	return sem;
 }
 
@@ -96,11 +123,13 @@ int sys_sem_post(sem_t *sem)
 int sys_sem_unlink(const char *name)
 {
 	int i = 0;
-	int index = find_sem(name);
+	char buf[1024] = {0};
+	int index = find_sem(name, buf);
 	cli();
 	if (index >= 0)
 	{
 		free(sem_info.sem_list[index]);
+		printk("sys_sem_unlink: %s\n", buf);
 	}
 	sti();
 	return i;
