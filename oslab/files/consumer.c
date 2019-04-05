@@ -94,7 +94,7 @@ char *buff = 0;
 int main(int argc, char **argv)
 {
 #define BUFF_LEN (10)
-#define MAX_SIZE (255)
+#define MAX_SIZE (120)
 
 	int shmid = 0;
 	int share_memory_address = 0;
@@ -106,8 +106,9 @@ int main(int argc, char **argv)
 	int count = 0;
 	FILE *result = NULL;
 	int *end_flag = 0;
+	int data = 0;
 
-	result = fopen("/var/result.txt", "wb+");
+	result = fopen("/var/restt", "a");
 	if (result == NULL)
 	{
 		printf("can not open result buff by wb+ \n");
@@ -132,6 +133,9 @@ int main(int argc, char **argv)
 
 	end_flag = (char*)(share_memory_address + 12);
 	
+	data = *(int*)(share_memory_address + 22);
+	printf("data: %d \n", data);
+
 	sem_empty = (sem_t *)sem_open("EMPTY", BUFF_LEN);
 	sem_full  = (sem_t *)sem_open("FULL", 0);
 	sem_mutex = (sem_t *)sem_open("MUTEX", 1);
@@ -139,14 +143,14 @@ int main(int argc, char **argv)
 	{
 		sem_wait(sem_full);
 		sem_wait(sem_mutex);
-
+		fseek(result, 2, SEEK_END);
 		fprintf(result, "pid:%d:  read data = %d, read index = %d\n", getpid(), buff[index], index);
 		fflush(result);
 		
 		index = (index + 1) % BUFF_LEN;
 
 		count++;
-		if (count >= MAX_SIZE)
+		if (count >= MAX_SIZE + 1)
 		{
 			*end_flag = 123;
 			printf("consumer:end_flag = %d\n", *(char*)(share_memory_address + 12));

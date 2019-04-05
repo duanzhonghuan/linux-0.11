@@ -80,6 +80,7 @@ int sys_sem_open(const char *name, unsigned int value)
 				sem_info.sem_list[i]->value = value;
 				sem_info.sem_list[i]->enable = 1;
 				strcpy(sem_info.sem_list[i]->name, buf);
+				printk("sys_sem_open: %s, i = %d\n", buf, i);
 				sem = sem_info.sem_list[i];
 				index = i;
 				break;
@@ -126,7 +127,7 @@ int sys_sem_unlink(const char *name)
 	char buf[1024] = {0};
 	int index = find_sem(name, buf);
 	cli();
-	if (index >= 0)
+	if (index >= 0 && sem_info.sem_list[index])
 	{
 		free(sem_info.sem_list[index]);
 		printk("sys_sem_unlink: %s\n", buf);

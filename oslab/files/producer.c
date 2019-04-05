@@ -95,7 +95,7 @@ int *value_index = 0;
 int main(int argc, char **argv)
 {
 #define BUFF_LEN (10)
-#define MAX_SIZE (255)
+#define MAX_SIZE (120)
 
 	int shmid = 0;
 	int share_memory_address = 0;
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 	FILE *result = NULL;
 	char *end_flag = 0;
 
-	result = fopen("/var/result.txt", "wb+");
+	result = fopen("/var/restt", "wb+");
 	if (result == NULL)
 	{
 		printf("can not open result buff by wb+ \n");
@@ -132,16 +132,18 @@ int main(int argc, char **argv)
 	end_flag = (char*)(share_memory_address + 12);
 	value_index = (int*)(share_memory_address + 16);
 
+	*(int*)(share_memory_address + 22) = 1234;
 
 	sem_empty = (sem_t *)sem_open("EMPTY", BUFF_LEN);
 	sem_full  = (sem_t *)sem_open("FULL", 0);
 	sem_mutex = (sem_t *)sem_open("MUTEX", 1);
-	for (i = 0; 1 <= MAX_SIZE; i++)
+	for (i = 0; i <= MAX_SIZE; i++)
 	{
 		sem_wait(sem_empty);  
 		sem_wait(sem_mutex); 
 		
 		buff[*value_index] = i;
+		fseek(result, 2, SEEK_END);
 		fprintf(result, "write: %d, write_index:%d\n", buff[*value_index], *value_index);
 		fflush(result);
 		*value_index = (*value_index + 1) % BUFF_LEN;
@@ -150,11 +152,12 @@ int main(int argc, char **argv)
 		sem_post(sem_full);
 	}
 	
+	while(*end_flag != 123);  // wait for the consumer  being finshed
+	fclose(result);
 	sem_unlink("EMPTY");
 	sem_unlink("FULL");
 	sem_unlink("MUTEX");
-	fclose(result);
-	
+
 	printf("producer end\n");
 	fflush(stdout);
 	return 0;
