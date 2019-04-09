@@ -17,6 +17,8 @@
 #include <asm/segment.h>
 #include <asm/system.h>
 
+extern void first_return_from_kernel();
+
 extern void write_verify(unsigned long address);
 
 long last_pid=0;
@@ -84,6 +86,33 @@ int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
 	p->pid = last_pid;
 	p->father = current->pid;
 	p->counter = p->priority;
+	
+	long *krnstack = 0;
+	krnstack = (long *)(PAGE_SIZE + (long)p);
+	*(--krnstack) = ss & 0xffff;
+	*(--krnstack) = esp;
+	*(--krnstack) = eflags;
+	*(--krnstack) = cs & 0xffff;
+	*(--krnstack) = eip;
+
+	*(--krnstack) = ds & 0xffff;
+	*(--krnstack) = es & 0xffff;
+	*(--krnstack) = fs & 0xffff;
+	*(--krnstack) = gs & 0xffff;
+	
+	*(--krnstack) = esi;
+	*(--krnstack) = edi;
+	*(--krnstack) = edx;
+
+	*(--krnstack) = (long)first_return_from_kernel;
+	
+	*(--krnstack) = ebp;
+	*(--krnstack) = ecx;
+	*(--krnstack) = ebx;
+	*(--krnstack) = 0;  /* eax */
+
+	p->krnstack = (long)krnstack;
+	
 	p->signal = 0;
 	p->alarm = 0;
 	p->leader = 0;		/* process leadership doesn't inherit */

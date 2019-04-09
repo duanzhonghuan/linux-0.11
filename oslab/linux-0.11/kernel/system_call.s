@@ -45,12 +45,16 @@ EFLAGS		= 0x24
 OLDESP		= 0x28
 OLDSS		= 0x2C
 
+KERNEL_STACK  = 12
+
+
 state	= 0		# these are offsets into the task-struct.
 counter	= 4
 priority = 8
-signal	= 12
-sigaction = 16		# MUST be 16 (=len of sigaction)
-blocked = (33*16)
+krnstack = 12
+signal	= 16
+sigaction = 20		# MUST be 16 (=len of sigaction)
+blocked = (33*16 + 4)
 
 # offsets within sigaction
 sa_handler = 0
@@ -67,6 +71,7 @@ nr_system_calls = 72
 .globl system_call,sys_fork,timer_interrupt,sys_execve
 .globl hd_interrupt,floppy_interrupt,parallel_interrupt
 .globl device_not_available, coprocessor_error
+.globl switch_to, first_return_from_kernel
 
 .align 2
 bad_sys_call:
@@ -283,3 +288,55 @@ parallel_interrupt:
 	outb %al,$0x20
 	popl %eax
 	iret
+
+.align 2
+switch_to:
+	pushl %ebp  
+	movl %esp,%ebp  # get current sp
+	pushl %ecx  # push the next LDT 
+	pushl %ebx  # push the next pcb pointer
+	pushl %eax  # push eax
+	movl 8(%ebp),%ebx  # get next pcb pointer
+	cmpl %ebx,current  # compare it that if the next is the current process
+	je 1f
+	
+	movl %ebx,%eax  
+	xchgl %eax,current  # change the PCB
+	
+	movl tss,%ecx
+	addl $4096,%ebx
+	movl %ebx,4(%ecx)  # rewrite the esp0 in the tss
+	
+	movl %esp,KERNEL_STACK(%eax)  # set the current kernel stack with  sp
+	movl 8(%ebp),%ebx  # get the next pcb pointer
+	movl KERNEL_STACK(%ebx), %esp  # set the sp with the next kernel_stack
+	
+	movl 12(%ebp),%ecx  # get the parameter of the _LDT(next)
+	lldt %cx  # modify the LDTR register
+
+	movl $0x17,%ecx
+	mov %cx,%fs  # rewrite the register of fs
+
+	cmpl %eax,last_task_used_math  # 和后面的clts配合来处理协处理器
+	
+	jne 1f
+	clts
+1:
+	popl %eax  # pop eax
+	popl %ebx  # pop ebx
+	popl %ecx  # pop ecx
+	popl %ebp  # pop ebp  
+	ret  # return
+
+.align 2
+first_return_from_kernel:
+	popl %edx
+	popl %edi
+	popl %esi
+
+	pop %gs
+	pop %fs
+	pop %es
+	pop %ds
+	iret
+
