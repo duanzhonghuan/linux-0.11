@@ -62,6 +62,9 @@ extern struct tty_struct tty_table[];
 */
 #define INIT_C_CC "\003\034\177\025\004\0\1\0\021\023\032\0\022\017\027\026\0"
 
+extern int switch_show_char_flag;
+void press_f12_handle(void);
+
 void rs_init(void);
 void con_init(void);
 void tty_init(void);

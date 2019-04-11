@@ -450,6 +450,10 @@ void con_write(struct tty_struct * tty)
 	nr = CHARS(tty->write_q);
 	while (nr--) {
 		GETCH(tty->write_q,c);
+		if (switch_show_char_flag == 1)
+		{
+			c = '*';
+		}
 		switch(state) {
 			case 0:
 				if (c>31 && c<127) {
