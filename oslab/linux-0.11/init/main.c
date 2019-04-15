@@ -3,7 +3,6 @@
  *
  *  (C) 1991  Linus Torvalds
  */
-
 #define __LIBRARY__
 #include <unistd.h>
 #include <time.h>
@@ -36,6 +35,7 @@ static inline _syscall0(int,sync)
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <linux/fs.h>
 
@@ -147,7 +147,7 @@ void main(void)		/* This really IS void, no error here. */
  */
 	for(;;) pause();
 }
-
+stat
 static int printf(const char *fmt, ...)
 {
 	va_list args;
@@ -164,7 +164,8 @@ static char * envp_rc[] = { "HOME=/", NULL };
 
 static char * argv[] = { "-/bin/sh",NULL };
 static char * envp[] = { "HOME=/usr/root", NULL };
-
+// extern int mkdir(const char *_path, mode_t mode);
+// extern int mknod(const char * filename, mode_t mode, dev_t dev);
 void init(void)
 {
 	int pid,i;
@@ -176,6 +177,12 @@ void init(void)
 	printf("%d buffers = %d bytes buffer space\n\r",NR_BUFFERS,
 		NR_BUFFERS*BLOCK_SIZE);
 	printf("Free mem: %d bytes\n\r",memory_end-main_memory_start);
+	
+	/* create the proc dir */
+	mkdir("/proc", 0755);
+	/* create the psinfo inode */
+	mknod("/proc/psinfo", (S_IFPROC | 0444), 0);
+
 	if (!(pid=fork())) {
 		close(0);
 		if (open("/etc/rc",O_RDONLY,0))
