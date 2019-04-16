@@ -52,6 +52,10 @@ extern long rd_init(long mem_start, int length);
 extern long kernel_mktime(struct tm * tm);
 extern long startup_time;
 
+
+_syscall2(int,mkdir,const char*,name,mode_t,mode)
+_syscall3(int,mknod,const char*,filename,mode_t,mode,dev_t,dev)
+
 /*
  * This is set up by the setup-routine at boot-time
  */
@@ -147,7 +151,7 @@ void main(void)		/* This really IS void, no error here. */
  */
 	for(;;) pause();
 }
-stat
+
 static int printf(const char *fmt, ...)
 {
 	va_list args;
@@ -164,8 +168,7 @@ static char * envp_rc[] = { "HOME=/", NULL };
 
 static char * argv[] = { "-/bin/sh",NULL };
 static char * envp[] = { "HOME=/usr/root", NULL };
-// extern int mkdir(const char *_path, mode_t mode);
-// extern int mknod(const char * filename, mode_t mode, dev_t dev);
+
 void init(void)
 {
 	int pid,i;
@@ -182,6 +185,8 @@ void init(void)
 	mkdir("/proc", 0755);
 	/* create the psinfo inode */
 	mknod("/proc/psinfo", (S_IFPROC | 0444), 0);
+	/* create the hdinfo inode */
+	mknod("/proc/hdinfo", (S_IFPROC | 0444), 1);
 
 	if (!(pid=fork())) {
 		close(0);

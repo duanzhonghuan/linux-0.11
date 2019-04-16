@@ -32,33 +32,33 @@
 00000000000i[     ]   SB16 support: yes
 00000000000i[     ]   USB support: yes
 00000000000i[     ]   VGA extension support: vbe cirrus
-00000000000i[MEM0 ] allocated memory at 0x7f555245b010. after alignment, vector=0x7f555245c000
+00000000000i[MEM0 ] allocated memory at 0x7f08fb542010. after alignment, vector=0x7f08fb543000
 00000000000i[MEM0 ] 16.00MB
 00000000000i[MEM0 ] mem block size = 0x00100000, blocks=16
 00000000000i[MEM0 ] rom at 0xfffe0000/131072 ('./bochs/BIOS-bochs-latest')
-00000000000i[     ] lt_dlhandle is 0x5616398fcae0
+00000000000i[     ] lt_dlhandle is 0x55d437de4ac0
 00000000000i[PLGIN] loaded plugin libbx_hdimage.so
-00000000000i[     ] lt_dlhandle is 0x5616398fd3c0
+00000000000i[     ] lt_dlhandle is 0x55d437de53a0
 00000000000i[PLGIN] loaded plugin libbx_cmos.so
-00000000000i[     ] lt_dlhandle is 0x5616398fdd10
+00000000000i[     ] lt_dlhandle is 0x55d437de5cf0
 00000000000i[PLGIN] loaded plugin libbx_dma.so
-00000000000i[     ] lt_dlhandle is 0x5616398fe7b0
+00000000000i[     ] lt_dlhandle is 0x55d437de6790
 00000000000i[PLGIN] loaded plugin libbx_pic.so
-00000000000i[     ] lt_dlhandle is 0x5616398ff060
+00000000000i[     ] lt_dlhandle is 0x55d437de7040
 00000000000i[PLGIN] loaded plugin libbx_pit.so
-00000000000i[     ] lt_dlhandle is 0x5616398ffaa0
+00000000000i[     ] lt_dlhandle is 0x55d437de7a80
 00000000000i[PLGIN] loaded plugin libbx_floppy.so
-00000000000i[     ] lt_dlhandle is 0x5616399006a0
+00000000000i[     ] lt_dlhandle is 0x55d437de8680
 00000000000i[PLGIN] loaded plugin libbx_vga.so
-00000000000i[     ] lt_dlhandle is 0x561639900f10
+00000000000i[     ] lt_dlhandle is 0x55d437de8ef0
 00000000000i[PLGIN] loaded plugin libbx_ioapic.so
-00000000000i[     ] lt_dlhandle is 0x561639901760
+00000000000i[     ] lt_dlhandle is 0x55d437de9740
 00000000000i[PLGIN] loaded plugin libbx_keyboard.so
-00000000000i[     ] lt_dlhandle is 0x5616399021f0
+00000000000i[     ] lt_dlhandle is 0x55d437dea1d0
 00000000000i[PLGIN] loaded plugin libbx_harddrv.so
 00000000000i[PLGIN] init_dev of 'cmos' plugin device by virtual method
 00000000000i[CMOS ] Using local time for initial clock
-00000000000i[CMOS ] Setting initial clock to: Tue Mar 19 21:17:28 2019 (time0=1553001448)
+00000000000i[CMOS ] Setting initial clock to: Tue Apr 16 21:20:07 2019 (time0=1555420807)
 00000000000i[PLGIN] init_dev of 'dma' plugin device by virtual method
 00000000000i[DMA  ] channel 4 used by cascade
 00000000000i[PLGIN] init_dev of 'pic' plugin device by virtual method
@@ -310,29 +310,24 @@
 00022568347i[MEM0 ] allocate_block: block=0x1 used 0x2 of 0x10
 00022758687i[MEM0 ] allocate_block: block=0xf used 0x3 of 0x10
 00022768118i[MEM0 ] allocate_block: block=0x3 used 0x4 of 0x10
-00259558606i[     ] Ctrl-C detected in signal handler.
-00325963537i[     ] Ctrl-C detected in signal handler.
-00358350757i[     ] Ctrl-C detected in signal handler.
-00468674929i[     ] Ctrl-C detected in signal handler.
-00540929867i[     ] Ctrl-C detected in signal handler.
-148068655116i[     ] Ctrl-C detected in signal handler.
-148068655116i[     ] dbg: Quit
-148068655116i[CPU0 ] CPU is in protected mode (active)
-148068655116i[CPU0 ] CS.mode = 32 bit
-148068655116i[CPU0 ] SS.mode = 32 bit
-148068655116i[CPU0 ] EFER   = 0x00000000
-148068655116i[CPU0 ] | EAX=ffffffff  EBX=ffffffff  ECX=0001b198  EDX=0000000e
-148068655116i[CPU0 ] | ESP=0001b0f8  EBP=00020e6c  ESI=00000000  EDI=00000002
-148068655116i[CPU0 ] | IOPL=0 id vip vif ac vm rf nt of df IF tf sf zf af pf cf
-148068655116i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
-148068655116i[CPU0 ] |  CS:0008( 0001| 0|  0) 00000000 00ffffff 1 1
-148068655116i[CPU0 ] |  DS:0010( 0002| 0|  0) 00000000 00ffffff 1 1
-148068655116i[CPU0 ] |  SS:0010( 0002| 0|  0) 00000000 00ffffff 1 1
-148068655116i[CPU0 ] |  ES:0010( 0002| 0|  0) 00000000 00ffffff 1 1
-148068655116i[CPU0 ] |  FS:0017( 0002| 1|  3) 00000000 0009ffff 1 1
-148068655116i[CPU0 ] |  GS:0017( 0002| 1|  3) 00000000 0009ffff 1 1
-148068655116i[CPU0 ] | EIP=00006ae2 (00006ae2)
-148068655116i[CPU0 ] | CR0=0x8000001b CR2=0x0805d40c
-148068655116i[CPU0 ] | CR3=0x00000000 CR4=0x00000000
-148068655116i[CMOS ] Last time is 1553038465 (Wed Mar 20 07:34:25 2019)
-148068655116i[CTRL ] quit_sim called with exit code 0
+04081875003i[     ] Ctrl-C detected in signal handler.
+04081875004i[     ] dbg: Quit
+04081875004i[CPU0 ] CPU is in protected mode (active)
+04081875004i[CPU0 ] CS.mode = 32 bit
+04081875004i[CPU0 ] SS.mode = 32 bit
+04081875004i[CPU0 ] EFER   = 0x00000000
+04081875004i[CPU0 ] | EAX=ffffffff  EBX=00000004  ECX=0001b168  EDX=00ffd000
+04081875004i[CPU0 ] | ESP=0001b0fc  EBP=00020e6c  ESI=00000001  EDI=00000002
+04081875004i[CPU0 ] | IOPL=0 id vip vif ac vm rf nt of df IF tf sf ZF af PF cf
+04081875004i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
+04081875004i[CPU0 ] |  CS:0008( 0001| 0|  0) 00000000 00ffffff 1 1
+04081875004i[CPU0 ] |  DS:0010( 0002| 0|  0) 00000000 00ffffff 1 1
+04081875004i[CPU0 ] |  SS:0010( 0002| 0|  0) 00000000 00ffffff 1 1
+04081875004i[CPU0 ] |  ES:0010( 0002| 0|  0) 00000000 00ffffff 1 1
+04081875004i[CPU0 ] |  FS:0017( 0002| 1|  3) 00000000 0009ffff 1 1
+04081875004i[CPU0 ] |  GS:0017( 0002| 1|  3) 00000000 0009ffff 1 1
+04081875004i[CPU0 ] | EIP=00006c2b (00006c2b)
+04081875004i[CPU0 ] | CR0=0x8000001b CR2=0x0804253c
+04081875004i[CPU0 ] | CR3=0x00000000 CR4=0x00000000
+04081875004i[CMOS ] Last time is 1555421827 (Tue Apr 16 21:37:07 2019)
+04081875004i[CTRL ] quit_sim called with exit code 0
