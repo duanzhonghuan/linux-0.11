@@ -36,12 +36,14 @@ static int sprintf(char *buf, const char *fmt, ...)
 }
 
 char* psinfo = 0;
+char *hdinfo = 0;
 
 static int update_psinfo(off_t * pos, char * buf, int count)
 {
 	struct task_struct **p = 0;
 	int offset = 0;
 	int i = 0;
+	static int flag = 0;
 	if (psinfo == 0)
 	{
 		psinfo = malloc(512);
@@ -66,7 +68,15 @@ static int update_psinfo(off_t * pos, char * buf, int count)
 	{
 		put_fs_byte(psinfo[i], buf+i);
 	}
-	return offset;
+	if (flag == 0)
+	{
+		flag = 1;
+		return offset;
+	}
+	flag = 0;
+	free(psinfo);
+	psinfo = 0;
+	return 0;
 }
 
 int proc_read(int dev, off_t * pos, char * buf, int count)
@@ -76,12 +86,35 @@ int proc_read(int dev, off_t * pos, char * buf, int count)
 	{
 		return update_psinfo(pos, buf, count);
 	}
-
+	
+	int offset = 0;
+	int i = 0;
+	static int flag = 0;
 	// read current hd info
 	if (dev == HD_DEV)
 	{
-		printk("waitting for ...");
-		return 0;
+		if (flag == 1)
+		{
+			flag = 0;
+			return 0;
+		}
+		struct super_block *s = 0;
+		s = get_super(dev);
+		hdinfo = malloc(512);
+		offset += sprintf(hdinfo + offset, "s_ninodes:         %d;\n", s->s_ninodes);
+		offset += sprintf(hdinfo + offset, "s_nzones:          %d;\n", s->s_nzones);
+		offset += sprintf(hdinfo + offset, "s_imap_blocks:     %d;\n", s->s_imap_blocks);
+		offset += sprintf(hdinfo + offset, "s_zmap_blocks:     %d;\n", s->s_zmap_blocks);
+		
+		// copy the data to user space
+		for (i = 0; i < offset; i++)
+		{
+			put_fs_byte(hdinfo[i], buf+i);
+		}
+		free(hdinfo);
+		hdinfo = 0;
+		flag = 1;
+		return offset;
 	}
 
 	return 0;
