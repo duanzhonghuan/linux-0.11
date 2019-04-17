@@ -100,4 +100,5 @@ truncate.o: truncate.c ../include/linux/sched.h ../include/linux/head.h \
   ../include/signal.h ../include/sys/stat.h
 
 proc.o: proc.c ../include/linux/sched.h ../include/sys/types.h \
-	../include/linux/kernel.h
+	../include/linux/kernel.h  ../include/stdarg.h \
+	../include/asm/segment.h

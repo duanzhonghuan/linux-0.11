@@ -19,6 +19,7 @@
 #include <linux/sched.h>
 #include <linux/kernel.h>
 #include <stdarg.h>
+#include <asm/segment.h>
 
 #define PS_DEV    (0)
 #define HD_DEV    (1)
@@ -40,6 +41,7 @@ static int update_psinfo(off_t * pos, char * buf, int count)
 {
 	struct task_struct **p = 0;
 	int offset = 0;
+	int i = 0;
 	if (psinfo == 0)
 	{
 		psinfo = malloc(512);
@@ -59,6 +61,12 @@ static int update_psinfo(off_t * pos, char * buf, int count)
 			   	(*p)->pid, (*p)->state, (*p)->father,
 			   	(*p)->counter, (*p)->start_time); 
 	}
+	// copy the data to user space
+	for (i = 0; i < offset; i++)
+	{
+		put_fs_byte(psinfo[i], buf+i);
+	}
+	return offset;
 }
 
 int proc_read(int dev, off_t * pos, char * buf, int count)
@@ -72,7 +80,8 @@ int proc_read(int dev, off_t * pos, char * buf, int count)
 	// read current hd info
 	if (dev == HD_DEV)
 	{
-
+		printk("waitting for ...");
+		return 0;
 	}
 
 	return 0;
